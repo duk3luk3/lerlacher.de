@@ -7,15 +7,20 @@ body {
 div#header {
     border-bottom: 2px solid black;
     margin-bottom: 30px;
-    padding: 12px 0px 12px 0px;
+    padding: 16px 0px 18px 0px;
 }
 
-div#logo a {
+div#logo {
     color: black;
     float: left;
     font-size: 18px;
     font-weight: bold;
     text-decoration: none;
+		margin-top: -6px;
+}
+
+div#logo img {
+	vertical-align: middle
 }
 
 div#header #navigation {
