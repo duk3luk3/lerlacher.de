@@ -15,8 +15,8 @@ main = hakyll $ do
         route   idRoute
         compile compressCssCompiler
 
-    match (fromList ["about.rst", "contact.markdown"]) $ do
-        route   $ setExtension "html"
+    match "static_html/*" $ do
+        route   $ setExtension "html" `composeRoutes` gsubRoute "static_html/" (const "")
         compile $ pandocCompiler
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
             >>= relativizeUrls
