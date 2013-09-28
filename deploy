@@ -1,0 +1,1 @@
+scp -r _site/* leda:/var/www/lerlacher.de/
