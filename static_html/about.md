@@ -1,17 +1,9 @@
 ---
 title: About
 ---
-Nullam imperdiet sodales orci vitae molestie. Nunc quam orci, pharetra a
-rhoncus vitae, eleifend id felis. Suspendisse potenti. Etiam vitae urna orci.
-Quisque pellentesque dignissim felis, egestas tempus urna luctus vitae. In hac
-habitasse platea dictumst. Morbi fringilla mattis odio, et mattis tellus
-accumsan vitae.
 
-1. Amamus Unicode 碁
-2. Interdum nex magna.
+Hello! My name is Lukas Erlacher. I am a hacker from Germany.
 
-Vivamus eget mauris sit amet nulla laoreet lobortis. Nulla in diam elementum
-risus convallis commodo. Cras vehicula varius dui vitae facilisis. Proin
-elementum libero eget leo aliquet quis euismod orci vestibulum. Duis rhoncus
-lorem consequat tellus vestibulum aliquam. Quisque orci orci, malesuada porta
-blandit et, interdum nec magna.
+This website exists to project my identity into the internet (or as they say, "blog"), showcase my projects and portfolio, and offer my services.
+
+As you might be able to deduce from the site design (only slightly adapted from the hakyll default site), I'm not a web designer. I'm the kind of person who uses the "Windows Classic" desktop theme and prefers the console to GUI applications.

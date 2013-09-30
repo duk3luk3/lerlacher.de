@@ -4,6 +4,10 @@ body {
     margin: 0px 5% 0px 5%;
 }
 
+code {
+  background-color: #eee;
+}
+
 div#header {
     border-bottom: 2px solid black;
     margin-bottom: 30px;
@@ -43,6 +47,12 @@ div#footer {
     margin-top: 30px;
     padding: 12px 0px 12px 0px;
     text-align: right;
+}
+
+span.subtext {
+		font-size: 12px;
+		margin-left: 1em;
+		border-bottom: 1px dashed;
 }
 
 h1 {
