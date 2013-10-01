@@ -3,14 +3,11 @@
     $if(author)$
         by $author$
     $endif$
-		$if(tags)$
-		<div>
-			Tags:
-			$for(tags)$
-				<a href="/tags/$tag$">$tag$</a>
-			$endfor$
-		</div>
-		$endif$
+    $if(tags)$
+    <br />
+    $tags$
+    $endif$
+
 </div>
 
 $body$

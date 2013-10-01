@@ -1,12 +1,17 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
-import           Data.Monoid (mappend)
-import           Hakyll
+import Data.Monoid (mappend, mconcat)
+import Control.Applicative
+import Hakyll
+import Hakyll.Web.Tags
 
 
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyll $ do
+
+    tags <- buildTags "posts/**" (fromCapture "tags/*.html")
+
     match "images/*" $ do
         route   idRoute
         compile copyFileCompiler
@@ -30,22 +35,34 @@ main = hakyll $ do
         compile $ do
         
             pandocCompiler
-                >>= loadAndApplyTemplate "templates/post.html"    postCtx
-                >>= loadAndApplyTemplate "templates/default.html" postCtx
+                >>= loadAndApplyTemplate "templates/post.html"    (postCtx tags)
+                >>= loadAndApplyTemplate "templates/default.html" (postCtx tags)
                 >>= relativizeUrls
 
     create ["archive.html"] $ do
         route idRoute
         compile $ do
             posts <- recentFirst =<< loadAll "posts/**"
-            let archiveCtx =
-                    listField "posts" postCtx (return posts) `mappend`
+            let archiveCtx = mconcat [
+                    listField "posts" (postCtx tags) (return posts) `mappend`
                     constField "title" "Archives"            `mappend`
                     defaultContext
+                    , tagCloudCtx tags ]
 
             makeItem ""
                 >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
                 >>= loadAndApplyTemplate "templates/default.html" archiveCtx
+                >>= relativizeUrls
+
+    tagsRules tags $ \tag pattern -> do
+        let title = "Tagged: " ++ tag
+        route idRoute
+        compile $ do
+            posts <- constField "posts" <$> postList pattern (postCtx tags) recentFirst
+
+            makeItem ""
+                >>= loadAndApplyTemplate "templates/posts.html" posts
+                >>= loadAndApplyTemplate "templates/default.html" defaultContext
                 >>= relativizeUrls
 
 
@@ -56,7 +73,7 @@ main = hakyll $ do
             --cats <- buildCategories "posts/**"
 
             let indexCtx =
-                    listField "posts" postCtx (return posts) `mappend`
+                    listField "posts" (postCtx tags) (return posts) `mappend`
                     constField "title" "Home"                `mappend`
                     defaultContext
 
@@ -69,7 +86,24 @@ main = hakyll $ do
 
 
 --------------------------------------------------------------------------------
-postCtx :: Context String
-postCtx =
-    dateField "date" "%B %e, %Y" `mappend`
-    defaultContext
+postCtx :: Tags -> Context String
+postCtx tags = mconcat 
+    [ dateField "date" "%B %e, %Y"
+    , tagsField "tags" tags
+    , defaultContext
+    ]
+
+tagCloudCtx :: Tags -> Context String
+tagCloudCtx tags = field "tagcloud" $ \item -> rendered
+    where rendered = renderTagCloud 85.0 165.0 tags
+
+-- | Creates a compiler to render a list of posts for a given pattern, context,
+-- and sorting/filtering function
+postList :: Pattern
+         -> Context String
+         -> ([Item String] -> Compiler [Item String])
+         -> Compiler String
+postList pattern postCtx sortFilter = do
+    posts <- sortFilter =<< loadAll pattern
+    itemTpl <- loadBody "templates/post-item.html"
+    applyTemplateList itemTpl postCtx posts
