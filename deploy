@@ -1,1 +1,1 @@
-scp -r _site/* leda:/var/www/lerlacher.de/
+rsync -r --delete --progress _site/* leda:/var/www/lerlacher.de/
