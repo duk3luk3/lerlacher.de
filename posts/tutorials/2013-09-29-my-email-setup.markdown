@@ -13,7 +13,7 @@ The punchline first:
 
 And now, for the meat.
 
-## Postfix
+## Postfix ##
 
 Postfix has two main config files: `main.cf`, which specifies what you would think of as config options, and `master.cf`, which specifies the services postfix should run (Postfix is not a single server, it runs several daemons).
 
@@ -86,4 +86,53 @@ The pgsql config looks like this:
     where_field=domain
     hosts=localhost
 
-And here is the database:
+## Postgres ##
+
+First, give the `postgres` user a password:
+
+    sudo -u postgres psql
+    ALTER USER postgres PASSWORD 'your-new-password';
+    \q
+
+Then, put appropriate access rules into `pg_hba.conf` (could be in `/etc/postgresql/9.1/main/pg_hba.conf` or similar). For eample:
+
+    local all  all                    md5
+    host  mail mailboxer 127.0.0.1/32 md5
+
+The database to back this config first needs a user config:
+
+    psql -U postgres
+    CREATE USER mailreader WITH PASSWORD 'foo';
+    REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+    REVOKE USAGE ON SCHEMA public FROM PUBLIC;
+    GRANT CREATE ON SCHEMA public TO postgres;
+    GRANT USAGE ON SCHEMA public TO postgres;
+
+Then a database:
+
+    CREATE DATABASE mail WITH OWNER mailreader;
+    \c mail
+
+Then tables:
+
+    CREATE TABLE aliases (
+        alias text NOT NULL,
+        email text NOT NULL
+    );
+    CREATE TABLE transports (
+        domain text NOT NULL,
+        gid integer NOT NULL,
+        transport text NOT NULL
+    );
+    CREATE TABLE users (
+        email text NOT NULL,
+        password text NOT NULL,
+        realname text,
+        maildir text NOT NULL,
+        created timestamp with time zone DEFAULT now(),
+        uid integer DEFAULT 500 NOT NULL,
+        gid integer DEFAULT 500 NOT NULL,
+        home character varying(128)
+     );
+
+
