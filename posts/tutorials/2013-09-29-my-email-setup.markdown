@@ -14,6 +14,16 @@ For my setup, I need:
 * Dovecot integration
 * Support for luser mail as well as virtual mailboxes
 
+This tutorial is based on Debian 7.1 *wheezy*, but it should work for most OSes.
+
+## Install packages ##
+
+    aptitude install postfix postgres dovecot dovecot-pgsql
+
+You probably want to
+
+    aptitude remove exim4
+
 ## Postfix ##
 
 Postfix has two main config files: `main.cf`, which specifies what you would think of as config options, and `master.cf`, which specifies the services postfix should run (Postfix is not a single server, it runs several daemons).
@@ -237,3 +247,13 @@ And finally the ssl config:
     ssl_cert = </etc/ssl/certs/yoursite.pem
     ssl_key = </etc/ssl/private/yoursite.key
 
+## The End ##
+
+    service postfix restart
+    service dovecot restart
+
+And you should be good to go.
+
+Oh, whenever you edit your `/etc/aliases` file for local luser aliases, run `newaliases`.
+
+What else do you want? Probably a firewall, maybe squirrelmail as imap webclient, and maybe spamassassin and clamav to scan your mail. For the latter, please refer to the tutorial I linked in the intro right on top!
