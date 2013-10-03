@@ -7,10 +7,6 @@ I run my own email setup on this server (Please don't use this info to hack me).
 
 There are dozens of postfix tutorials around. I mainly used [this one](http://shisaa.jp/postset/mailserver-1.html). You should probably read it in order to gain an understanding of how the email system works and how postfix and dovecot tie into that, because I will only touch on that rather lightly.
 
-## Postfix ##
-
-Postfix has two main config files: `main.cf`, which specifies what you would think of as config options, and `master.cf`, which specifies the services postfix should run (Postfix is not a single server, it runs several daemons).
-
 For my setup, I need:
 
 * TLS/SASL, because it's 2013
@@ -18,10 +14,14 @@ For my setup, I need:
 * Dovecot integration
 * Support for luser mail as well as virtual mailboxes
 
+## Postfix ##
+
+Postfix has two main config files: `main.cf`, which specifies what you would think of as config options, and `master.cf`, which specifies the services postfix should run (Postfix is not a single server, it runs several daemons).
+
 First we create a mailbox user that will be used by postgres and dovecot to access actual maildirs.
 
     groupadd -g 500 mailreader    
-    useradd -g mailreader -u 500 -d /home/mail -s /sbin/nologin mailreader
+    useradd -g mailreader -u 500 -d /home/mailboxes -s /sbin/nologin mailreader
 
 Since the internet hasn't really properly caught up to 2013, we need to run both the standard smtp daemon for use by other MTAs in addition to the "modern" submission service that we will be using from our mail clients.
 
@@ -166,3 +166,74 @@ The `users` table does not require a `uid` or `gid` field in my usecase, since a
     );
 
 Again - this table is for virtual mailboxes only. Don't put the addresses of lusers in there.
+
+## Dovecot ##
+
+In Dovecot, we also need a sql setup:
+
+    driver = pgsql
+    connect = host=localhost dbname=mail user=mailreader password=$password
+    default_pass_scheme = SHA512
+    password_query = SELECT email as user, password, 'maildir:/home/mailboxes/'||maildir as userdb_mail FROM users WHERE email = '%u'
+
+Save that as `/etc/dovecot/dovecot-sql.conf` and put the following into `/etc/dovecot/dovecot.conf`:
+
+We use plaintext auth encapsulated in TLS.
+
+    disable_plaintext_auth = no
+    
+Add permission config:  uid and gid are for the virtual mailboxes, privileged\_group is for the luser mails in /var/mail/
+
+    mail_uid = 500
+    mail_gid = 500
+    mail_privileged_group = mail
+    
+For the virtual mailboxes, sql user and auth db for virtual mailboxes (the prefetch means the user identification will be done by the authentication)
+
+    userdb {
+      driver = prefetch
+    }
+    passdb {
+      args = /etc/dovecot/dovecot-sql.conf
+      driver = sql
+    }
+
+Now the user config for local users:
+
+    userdb {
+      driver = passwd
+    }
+    passdb {
+      args = %s
+      driver = pam
+    }
+
+Enable imap protocol only, automatically add a Trash and Sent folder to mailboxes
+    
+    protocols = " imap"
+    protocol imap {
+      mail_plugins = " autocreate"
+    }
+    plugin {
+      autocreate = Trash
+      autocreate2 = Sent
+      autosubscribe = Trash
+      autosubscribe2 = Sent
+    }
+
+We configured postfix to use dovecot as authentication provider. This is the socket dovecot runs to enable that.
+    
+    service auth {
+      unix_listener /var/spool/postfix/private/auth {
+        group = postfix
+        mode = 0660
+        user = postfix
+      }
+    }
+
+And finally the ssl config:
+    
+    ssl=yes
+    ssl_cert = </etc/ssl/certs/yoursite.pem
+    ssl_key = </etc/ssl/private/yoursite.key
+
