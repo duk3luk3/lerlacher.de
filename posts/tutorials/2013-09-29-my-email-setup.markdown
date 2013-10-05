@@ -98,6 +98,12 @@ The pgsql config looks like this:
     where_field=domain
     hosts=localhost
 
+Save those files to `/etc/postfix/pgsql/` and then make sure the permissions are set properly:
+
+    chown -R root:postfix /etc/postfix/pgsql
+    chmod 750 /etc/postfix/pgsql
+    chmod 740 /etc/postfix/pgsql/*
+
 ## Postgres ##
 
 First, give the `postgres` user a password:
