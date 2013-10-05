@@ -2,7 +2,7 @@
 title: About
 ---
 
-Hello! My name is Lukas Erlacher. I am a [hacker](http://www.catb.org/hacker-emblem/) from Germany.
+Hello! My name is Lukas Erlacher. I am a hacker (thus the [glider](http://www.catb.org/hacker-emblem/) in the logo) from Germany.
 
 This website exists to project my identity into the internet (or as they say, "blog"), showcase my projects and portfolio, and offer my services.
 

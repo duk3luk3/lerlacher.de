@@ -7,21 +7,31 @@ I run my own email setup on this server (Please don't use this info to hack me).
 
 There are dozens of postfix tutorials around. I mainly used [this one](http://shisaa.jp/postset/mailserver-1.html). You should probably read it in order to gain an understanding of how the email system works and how postfix and dovecot tie into that, because I will only touch on that rather lightly.
 
-The punchline first:
-
-    local_recipient_maps =
-
-And now, for the meat.
-
-## Postfix ##
-
-Postfix has two main config files: `main.cf`, which specifies what you would think of as config options, and `master.cf`, which specifies the services postfix should run (Postfix is not a single server, it runs several daemons).
-
 For my setup, I need:
 
 * TLS/SASL, because it's 2013
 * No relay
 * Dovecot integration
+* Support for luser mail as well as virtual mailboxes
+
+This tutorial is based on Debian 7.1 *wheezy*, but it should work for most OSes.
+
+## Install packages ##
+
+    aptitude install postfix postgres dovecot dovecot-pgsql
+
+You probably want to
+
+    aptitude remove exim4
+
+## Postfix ##
+
+Postfix has two main config files: `main.cf`, which specifies what you would think of as config options, and `master.cf`, which specifies the services postfix should run (Postfix is not a single server, it runs several daemons).
+
+First we create a mailbox user that will be used by postgres and dovecot to access actual maildirs.
+
+    groupadd -g 500 mailreader    
+    useradd -g mailreader -u 500 -d /home/mailboxes -s /sbin/nologin mailreader
 
 Since the internet hasn't really properly caught up to 2013, we need to run both the standard smtp daemon for use by other MTAs in addition to the "modern" submission service that we will be using from our mail clients.
 
@@ -57,6 +67,8 @@ Then I set the virtual mailbox config:
     virtual_maps = pgsql:/etc/postfix/pgsql/virtual.cf
     fallback_transport_maps = pgsql:/etc/postfix/pgsql/transport.cf
 
+This config - although it may not be obvious - sets up the virtual mailboxes as a fallback if mails cannot be delivered to a local luser.
+
 The pgsql config looks like this:
 
     ## mailboxes.cf
@@ -78,7 +90,7 @@ The pgsql config looks like this:
     hosts=localhost
 
     ## transport.cf
-    user=mailboxer
+    user=$mailboxuser
     password=$password
     dbname=mail
     table=transports
@@ -108,6 +120,8 @@ The database to back this config first needs a user config:
     GRANT CREATE ON SCHEMA public TO postgres;
     GRANT USAGE ON SCHEMA public TO postgres;
 
+Note that the `mailreader` user here is for postgres only; it is completely separate from the `mailreader` user we created on the system before.
+
 Then a database:
 
     CREATE DATABASE mail WITH OWNER mailreader;
@@ -127,12 +141,119 @@ Then tables:
     CREATE TABLE users (
         email text NOT NULL,
         password text NOT NULL,
-        realname text,
         maildir text NOT NULL,
         created timestamp with time zone DEFAULT now(),
-        uid integer DEFAULT 500 NOT NULL,
-        gid integer DEFAULT 500 NOT NULL,
-        home character varying(128)
      );
 
+     ALTER TABLE users OWNER TO mailreader;
+     ALTER TABLE transports OWNER TO mailreader;
+     ALTER TABLE aliases OWNER TO mailreader;
 
+The `aliases` table should be clear. The `transports` table determines which transports postgres should use for a domain, and includes an additional field overriding the gid to use while handling mail for that domain. Add, for example:
+
+    INSERT INTO transports (
+        domain, 
+        gid,
+        transport
+    ) VALUES (
+        'yourdomain.tld',
+        500,
+        'virtual:'
+    );
+
+The `users` table does not require a `uid` or `gid` field in my usecase, since all users in that table are virtual mailboxes that are all handled by the same mailreader user (we set that up with the `virtual_uid_maps` and `virtual_gid_maps` setting in postgres. We will do the same in dovecot).
+
+    INSERT INTO users (
+        email, 
+        password, 
+        realname, 
+        maildir,
+    ) VALUES (
+        'foo@yourdomain.tld', 
+        md5('password'), 
+        'Foo Lastname', 
+        'foo/'
+    );
+
+Again - this table is for virtual mailboxes only. Don't put the addresses of lusers in there.
+
+## Dovecot ##
+
+In Dovecot, we also need a sql setup:
+
+    driver = pgsql
+    connect = host=localhost dbname=mail user=mailreader password=$password
+    default_pass_scheme = SHA512
+    password_query = SELECT email as user, password, 'maildir:/home/mailboxes/'||maildir as userdb_mail FROM users WHERE email = '%u'
+
+Save that as `/etc/dovecot/dovecot-sql.conf` and put the following into `/etc/dovecot/dovecot.conf`:
+
+We use plaintext auth encapsulated in TLS.
+
+    disable_plaintext_auth = no
+    
+Add permission config:  uid and gid are for the virtual mailboxes, privileged\_group is for the luser mails in /var/mail/
+
+    mail_uid = 500
+    mail_gid = 500
+    mail_privileged_group = mail
+    
+For the virtual mailboxes, sql user and auth db for virtual mailboxes (the prefetch means the user identification will be done by the authentication)
+
+    userdb {
+      driver = prefetch
+    }
+    passdb {
+      args = /etc/dovecot/dovecot-sql.conf
+      driver = sql
+    }
+
+Now the user config for local users:
+
+    userdb {
+      driver = passwd
+    }
+    passdb {
+      args = %s
+      driver = pam
+    }
+
+Enable imap protocol only, automatically add a Trash and Sent folder to mailboxes
+    
+    protocols = " imap"
+    protocol imap {
+      mail_plugins = " autocreate"
+    }
+    plugin {
+      autocreate = Trash
+      autocreate2 = Sent
+      autosubscribe = Trash
+      autosubscribe2 = Sent
+    }
+
+We configured postfix to use dovecot as authentication provider. This is the socket dovecot runs to enable that.
+    
+    service auth {
+      unix_listener /var/spool/postfix/private/auth {
+        group = postfix
+        mode = 0660
+        user = postfix
+      }
+    }
+
+And finally the ssl config:
+    
+    ssl=yes
+    ssl_cert = </etc/ssl/certs/yoursite.pem
+    ssl_key = </etc/ssl/private/yoursite.key
+
+## The End ##
+
+    service postfix restart
+    service dovecot restart
+
+And you should be good to go.
+
+Oh, whenever you edit your `/etc/aliases` file for local luser aliases, run `newaliases`.
+
+What else do you want? Probably a firewall, maybe squirrelmail as imap webclient, and maybe spamassassin and clamav to scan your mail. For the latter, please refer to the tutorial I linked in the intro right on top!
