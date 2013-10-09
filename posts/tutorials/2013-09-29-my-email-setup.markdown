@@ -1,7 +1,9 @@
 ---
 title: My E-Mail setup
-tags: email, postfix
+tags: email, postfix, wip
 ---
+
+**This is a work in progress. It is currently broken because it can cause backscatter. Please don't use this tutorial at this time.**
 
 I run my own email setup on this server (Please don't use this info to hack me). The default options here are Postfix and Dovecot.
 
