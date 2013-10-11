@@ -3,11 +3,11 @@ title: My E-Mail setup
 tags: email, postfix, wip
 ---
 
-**This is a work in progress. It is currently broken because it can cause backscatter. Please don't use this tutorial at this time.**
-
 I run my own email setup on this server (Please don't use this info to hack me). The default options here are Postfix and Dovecot.
 
 There are dozens of postfix tutorials around. I mainly used [this one](http://shisaa.jp/postset/mailserver-1.html). You should probably read it in order to gain an understanding of how the email system works and how postfix and dovecot tie into that, because I will only touch on that rather lightly.
+
+You should also read the [postfix config documentation](http://www.postfix.org/postconf.5.html).
 
 For my setup, I need:
 
@@ -61,15 +61,15 @@ In main.cf, I first enabled TLS:
 
 Then I set the virtual mailbox config:
 
-    local_recipient_maps =
+    local_recipient_maps = proxy:unix:passwd.byname $alias_maps $virtual_mailbox_maps
+    fallback_transport = virtual
     virtual_uid_maps = static:$mailboxuser_uid
     virtual_gid_maps = static:$mailboxuser_gid
     virtual_mailbox_base = /home/mailboxes
     virtual_mailbox_maps = pgsql:/etc/postfix/pgsql/mailboxes.cf
     virtual_maps = pgsql:/etc/postfix/pgsql/virtual.cf
-    fallback_transport_maps = pgsql:/etc/postfix/pgsql/transport.cf
 
-This config - although it may not be obvious - sets up the virtual mailboxes as a fallback if mails cannot be delivered to a local luser.
+This config sets up the virtual mailboxes as a fallback if mails cannot be delivered to a local luser. The local_recipient_maps option specifies all addresses that postfix accepts mail for. All other mail is rejected. This is an important setting because it avoids so-called backscatter. If postfix cannot determine all valid users immediately, like when local_recipients_maps is unset, it will accept mail and then send a non-delivery notice later. These non-delivery notices usually hit innocent people whose addresses have been spoofed in spam and scam mails.
 
 The pgsql config looks like this:
 
@@ -91,15 +91,6 @@ The pgsql config looks like this:
     where_field=alias
     hosts=localhost
 
-    ## transport.cf
-    user=$mailboxuser
-    password=$password
-    dbname=mail
-    table=transports
-    select_field=transport
-    where_field=domain
-    hosts=localhost
-
 Save those files to `/etc/postfix/pgsql/` and then make sure the permissions are set properly:
 
     chown -R root:postfix /etc/postfix/pgsql
@@ -114,7 +105,7 @@ First, give the `postgres` user a password:
     ALTER USER postgres PASSWORD 'your-new-password';
     \q
 
-Then, put appropriate access rules into `pg_hba.conf` (could be in `/etc/postgresql/9.1/main/pg_hba.conf` or similar). For eample:
+Then, put appropriate access rules into `pg_hba.conf` (could be in `/etc/postgresql/9.1/main/pg_hba.conf` or similar). For example:
 
     local all  all                    md5
     host  mail mailboxer 127.0.0.1/32 md5
@@ -141,11 +132,6 @@ Then tables:
         alias text NOT NULL,
         email text NOT NULL
     );
-    CREATE TABLE transports (
-        domain text NOT NULL,
-        gid integer NOT NULL,
-        transport text NOT NULL
-    );
     CREATE TABLE users (
         email text NOT NULL,
         password text NOT NULL,
@@ -154,22 +140,11 @@ Then tables:
      );
 
      ALTER TABLE users OWNER TO mailreader;
-     ALTER TABLE transports OWNER TO mailreader;
      ALTER TABLE aliases OWNER TO mailreader;
 
-The `aliases` table should be clear. The `transports` table determines which transports postgres should use for a domain, and includes an additional field overriding the gid to use while handling mail for that domain. Add, for example:
+The `aliases` table should be clear. 
 
-    INSERT INTO transports (
-        domain, 
-        gid,
-        transport
-    ) VALUES (
-        'yourdomain.tld',
-        500,
-        'virtual:'
-    );
-
-The `users` table does not require a `uid` or `gid` field in my usecase, since all users in that table are virtual mailboxes that are all handled by the same mailreader user (we set that up with the `virtual_uid_maps` and `virtual_gid_maps` setting in postgres. We will do the same in dovecot).
+The users table will have entries like this:
 
     INSERT INTO users (
         email, 
@@ -199,13 +174,13 @@ Save that as `/etc/dovecot/dovecot-sql.conf` and put the following into `/etc/do
 We use plaintext auth encapsulated in TLS.
 
     disable_plaintext_auth = no
-    
+
 Add permission config:  uid and gid are for the virtual mailboxes, privileged\_group is for the luser mails in /var/mail/
 
     mail_uid = 500
     mail_gid = 500
     mail_privileged_group = mail
-    
+
 For the virtual mailboxes, sql user and auth db for virtual mailboxes (the prefetch means the user identification will be done by the authentication)
 
     userdb {
