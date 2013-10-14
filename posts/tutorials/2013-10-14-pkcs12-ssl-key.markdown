@@ -1,0 +1,8 @@
+---
+title: Extract private key from pkcs12 file
+tags: ssl
+---
+
+    openssl pkcs12 -in domain.tld.p12 -nocerts -out /etc/ssl/private/domain.tld.key
+
+Enter the password the pkcs12 container is encrypted with. It will then prompt you for a password to encrypt the key with. You probably want to leave that empty.
