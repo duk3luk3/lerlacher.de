@@ -3,6 +3,8 @@ title: Extract private key from pkcs12 file
 tags: ssl
 ---
 
-openssl pkcs12 -in NAME.p12 -nodes -nocerts -nomacver | perl -ne '$print=1 if /^-/; print if $print;' > NAME.key
+It's surprisingly involved:
+
+    openssl pkcs12 -in NAME.p12 -nodes -nocerts -nomacver | perl -ne '$print=1 if /^-/; print if $print;' > NAME.key
 
 Enter the password the pkcs12 container is encrypted with. It will then prompt you for a password to encrypt the key with. You probably want to leave that empty.
