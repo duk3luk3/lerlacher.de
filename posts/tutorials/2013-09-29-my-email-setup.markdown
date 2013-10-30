@@ -59,6 +59,19 @@ In main.cf, I first enabled TLS:
     smtpd_tls_security_level=may
     smtpd_tls_protocols = !SSLv2, !SSLv3
 
+Then the domain info, network info and relay disable: (that one is important)
+
+    myhostname = leda.lerlacher.de
+    alias_maps = hash:/etc/aliases
+    alias_database = hash:/etc/aliases
+    myorigin = /etc/mailname
+    mydestination = leda.lerlacher.de, lerlacher.de, localhost, localhost.localdomain
+    relayhost = 
+    mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+    mailbox_size_limit = 0
+    recipient_delimiter = +
+    inet_interfaces = all
+
 Then I set the virtual mailbox config:
 
     local_recipient_maps = proxy:unix:passwd.byname $alias_maps $virtual_mailbox_maps
@@ -69,7 +82,8 @@ Then I set the virtual mailbox config:
     virtual_mailbox_maps = pgsql:/etc/postfix/pgsql/mailboxes.cf
     virtual_maps = pgsql:/etc/postfix/pgsql/virtual.cf
 
-This config sets up the virtual mailboxes as a fallback if mails cannot be delivered to a local luser. The local_recipient_maps option specifies all addresses that postfix accepts mail for. All other mail is rejected. This is an important setting because it avoids so-called backscatter. If postfix cannot determine all valid users immediately, like when local_recipients_maps is unset, it will accept mail and then send a non-delivery notice later. These non-delivery notices usually hit innocent people whose addresses have been spoofed in spam and scam mails.
+This config sets up the virtual mailboxes as a fallback if mails cannot be delivered to a local luser. The `local_recipient_map`s option specifies all addresses that postfix accepts mail for.  
+All other mail is rejected. This is an important setting because it avoids so-called backscatter: If postfix cannot determine all valid users immediately, like when `local_recipient_maps` is unset, it will accept mail and then send a non-delivery notice later. These non-delivery notices usually hit innocent people whose addresses have been spoofed in spam and scam mails.
 
 The pgsql config looks like this:
 
