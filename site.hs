@@ -11,6 +11,7 @@ main :: IO ()
 main = hakyll $ do
 
     tags <- buildTags "posts/**" (fromCapture "tags/*.html")
+    categories <- buildCategories "posts/**" (fromCapture "tags/*.html")
 
     match "images/*" $ do
         route   idRoute
@@ -31,13 +32,16 @@ main = hakyll $ do
         compile copyFileCompiler
 
     match "posts/**" $ do
-        route $ setExtension "html"
+        route $ setExtension "html" `composeRoutes` (gsubRoute ".*/" (const "posts/")) 
         compile $ do
         
             pandocCompiler
                 >>= loadAndApplyTemplate "templates/post.html"    (postCtx tags)
                 >>= loadAndApplyTemplate "templates/default.html" (postCtx tags)
                 >>= relativizeUrls
+
+    match "posts/**" $ do
+        route $ setExtension "html"
 
     create ["archive.html"] $ do
         route idRoute
