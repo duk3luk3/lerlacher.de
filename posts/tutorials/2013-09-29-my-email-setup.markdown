@@ -183,13 +183,13 @@ In Dovecot, we also need a sql setup:
     default_pass_scheme = SHA512
     password_query = SELECT email as user, password, 'maildir:/home/mailboxes/'||maildir as userdb_mail FROM users WHERE email = '%u'
 
-Save that as `/etc/dovecot/dovecot-sql.conf` and put the following into `/etc/dovecot/dovecot.conf`:
+Save that as `/etc/dovecot/dovecot-sql.conf` and put the following into `/etc/dovecot/dovecot.conf`: (clear the entire dovecot.conf first, or at least disable the inclusion of all of the `conf.d` directory)
 
-We use plaintext auth encapsulated in TLS.
+We use plaintext auth encapsulated in TLS, so we can't disable plaintext auth.
 
     disable_plaintext_auth = no
 
-Add permission config:  uid and gid are for the virtual mailboxes, privileged\_group is for the luser mails in /var/mail/
+Add permission config:  `uid` and `gid` are for the virtual mailboxes, `privileged\_group` is for the luser mails in `/var/mail/`:
 
     mail_uid = 500
     mail_gid = 500
@@ -240,9 +240,11 @@ We configured postfix to use dovecot as authentication provider. This is the soc
 
 And finally the ssl config:
     
-    ssl=yes
+    ssl=required
     ssl_cert = </etc/ssl/certs/yoursite.pem
     ssl_key = </etc/ssl/private/yoursite.key
+
+If you set `ssl=yes` dovecot will accept completely unsecured plaintext authentication on port 143. Don't do that.
 
 ## The End ##
 
