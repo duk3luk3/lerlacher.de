@@ -6,7 +6,7 @@ Etherpad-Lite uses the same key-value-store abstraction for all the databases it
 
 So you have a `etherpad.db.sqlite` file and want to migrate that into a postgres db because you think a real dbms might be faster.
 
-Some people [try to do it with node](file:///home/luke/stackoverflow.com/questions/18694659/best-way-to-migrate-huge-sqlite-databases-in-etherpad-lite), but why would you do that?
+Some people [try to do it with node](//stackoverflow.com/questions/18694659/best-way-to-migrate-huge-sqlite-databases-in-etherpad-lite), but why would you do that?
 
     psql -U postgres
     CREATE USER etherpad WITH PASSWORD 'foo';

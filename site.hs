@@ -40,8 +40,9 @@ main = hakyll $ do
                 >>= loadAndApplyTemplate "templates/default.html" (postCtx tags)
                 >>= relativizeUrls
 
-    match "posts/**" $ do
-        route $ setExtension "html"
+--    match "posts/**" $ do
+--        route $ setExtension "html"
+--        compile $ 
 
     create ["archive.html"] $ do
         route idRoute
