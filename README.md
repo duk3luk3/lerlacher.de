@@ -1,1 +1,1 @@
-This is a hakyll site. </jaspervdj/hakyll>
+This is a [hakyll](//github.com/jaspervdj/hakyll) site.
