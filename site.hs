@@ -11,7 +11,7 @@ main :: IO ()
 main = hakyll $ do
 
     tags <- buildTags "posts/**" (fromCapture "tags/*.html")
-    categories <- buildCategories "posts/**" (fromCapture "tags/*.html")
+    categories <- buildCategories "posts/**" (fromCapture "posts/*.html")
 
     match "images/*" $ do
         route   idRoute
@@ -48,9 +48,28 @@ main = hakyll $ do
         route idRoute
         compile $ do
             posts <- recentFirst =<< loadAll "posts/**"
+            categories <- buildCategories "posts/**" (fromCapture "posts/*.html")
+            let categoryMap = tagsMap categories
             let archiveCtx = mconcat [
-                    listField "posts" (postCtx tags) (return posts) `mappend`
-                    constField "title" "Archives"            `mappend`
+                    listField "posts" (postCtx tags) (return posts),
+                    constField "title" "Archives",
+                    defaultContext
+                    , tagCloudCtx tags ]
+
+            makeItem ""
+                >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
+                >>= loadAndApplyTemplate "templates/default.html" archiveCtx
+                >>= relativizeUrls
+
+    create ["archive2.html"] $ do
+        route idRoute
+        compile $ do
+            posts <- recentFirst =<< loadAll "posts/**"
+            categories <- buildCategories "posts/**" (fromCapture "posts/*.html")
+            let categoryMap = tagsMap categories
+            let archiveCtx = mconcat [
+                    listField "categories" (postCtx tags) (return categoryMap),
+                    constField "title" "Archives",
                     defaultContext
                     , tagCloudCtx tags ]
 
@@ -112,3 +131,9 @@ postList pattern postCtx sortFilter = do
     posts <- sortFilter =<< loadAll pattern
     itemTpl <- loadBody "templates/post-item.html"
     applyTemplateList itemTpl postCtx posts
+
+--catOnly :: MonadMetadata m => Tags -> [Item a] -> m [Item a]
+--catOnly cats = 
+
+
+--catPosts pattern postCtx category = postList pattern postCtx (\post -> getCategory post == category)
