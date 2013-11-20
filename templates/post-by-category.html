@@ -1,0 +1,10 @@
+$for(categories)$
+<h3>$category$</h3>
+<ul>
+    $for(posts)$
+        <li>
+            <a href="$url$">$title$</a> - $date$
+        </li>
+    $endfor$
+</ul>
+$endfor$

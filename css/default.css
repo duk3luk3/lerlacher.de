@@ -69,3 +69,11 @@ div.info {
     font-size: 14px;
     font-style: italic;
 }
+
+span.taglinks {
+    font-size: 60%;
+}
+
+span.taglinks a {
+    color: #000;
+}
