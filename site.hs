@@ -48,8 +48,6 @@ main = hakyll $ do
         route idRoute
         compile $ do
             posts <- recentFirst =<< loadAll "posts/**"
-            categories <- buildCategories "posts/**" (fromCapture "posts/*.html")
-            let categoryMap = tagsMap categories
             let archiveCtx = mconcat [
                     listField "posts" (postCtx tags) (return posts),
                     constField "title" "Archives",
@@ -67,10 +65,11 @@ main = hakyll $ do
             posts <- recentFirst =<< loadAll "posts/**"
             categories <- buildCategories "posts/**" (fromCapture "posts/*.html")
             let categoryMap = tagsMap categories
+            let categoryPatterns = map \(s,i)->(s, fromList i) categoryMap
             let archiveCtx = mconcat [
-                    listField "categories" (postCtx tags) (return categoryMap),
-                    constField "title" "Archives",
-                    defaultContext
+                    listField "categories" (postCtx tags) (return categoryMap)
+                    , constField "title" "Archives"
+                    , defaultContext
                     , tagCloudCtx tags ]
 
             makeItem ""
