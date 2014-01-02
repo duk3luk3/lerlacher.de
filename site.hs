@@ -61,22 +61,22 @@ main = hakyll $ do
                 >>= loadAndApplyTemplate "templates/default.html" archiveCtx
                 >>= relativizeUrls
 
---    create ["archive2.html"] $ do
---        route idRoute
---        compile $ do
---            --posts <- recentFirst =<< loadAll "posts/**"
---            --categories <- buildCategories "posts/**" (fromCapture "posts/*.html")
---            --let categoryMap = tagsMap categories
---            let archiveCtx = mconcat [
---            --        listField "categories" (postCtx tags) (return categoryMap),
---                    constField "title" "Archives",
---                    defaultContext
---                    , tagCloudCtx tags ]
---
---            makeItem ""
---                >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
---                >>= loadAndApplyTemplate "templates/default.html" archiveCtx
---                >>= relativizeUrls
+    create ["archive2.html"] $ do
+        route idRoute
+        compile $ do
+            posts <- recentFirst =<< loadAll "posts/**"
+            categories <- buildCategories "posts/**" (fromCapture "posts/*.html")
+            let categoryMap = tagsMap categories
+            let archiveCtx = mconcat [
+                    listField "categories" (postCtx tags) (return categoryMap),
+                    constField "title" "Archives",
+                    defaultContext
+                    , tagCloudCtx tags ]
+
+            makeItem ""
+                >>= loadAndApplyTemplate "templates/post-by-category.html" archiveCtx
+                >>= loadAndApplyTemplate "templates/default.html" archiveCtx
+                >>= relativizeUrls
 
     tagsRules tags $ \tag pattern -> do
         let title = "Tagged: " ++ tag
