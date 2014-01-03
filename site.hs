@@ -1,6 +1,7 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 import Data.Monoid (mappend, mconcat)
+import Data.Maybe (fromMaybe)
 import Control.Applicative
 import Hakyll
 import Hakyll.Web.Tags
@@ -130,6 +131,37 @@ postList pattern postCtx sortFilter = do
     posts <- sortFilter =<< loadAll pattern
     itemTpl <- loadBody "templates/post-item.html"
     applyTemplateList itemTpl postCtx posts
+
+-- | Creates a compiler to render a list of posts partitioned by categories
+categoryList :: Tags
+             -> Context String
+             -> ([Item String] -> Compiler [Item String])
+             -> Compiler String
+categoryList categories postCtx sortFilter = do
+-- what now?
+
+-- | Creates a compiler to render a post list with a category headline
+categoryPostList :: Pattern
+                 -> String
+                 -> Context String
+                 -> ([Item String] -> Compiler [Item String])
+                 -> Compiler String
+categoryPostList pattern catname postCtx sortFilter = do
+    posts <- sortFilter =<< loadAll pattern
+    catTpl <- loadBody "templates/post-by-category.html"
+    itemTpl <- loadBody "templates/post-item.html"
+    let catCtx = mconcat [
+      constField "category" catname
+      , defaultCtx
+    ]
+    applyTemplateList itemTpl postCtx posts
+    >== applyTemplate catTpl catCtx
+
+
+
+categoryPattern :: Tags -> String -> Pattern
+categoryPattern map name =
+    fromList $ fromMaybe [] $ lookup name map
 
 --catOnly :: MonadMetadata m => Tags -> [Item a] -> m [Item a]
 --catOnly cats = 
