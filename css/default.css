@@ -36,7 +36,9 @@ div#header #navigation a {
     color: black;
     font-size: 18px;
     font-weight: bold;
-    margin-left: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-left: 1px black solid;
     text-decoration: none;
     text-transform: uppercase;
 }
