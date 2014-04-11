@@ -1,6 +1,6 @@
 ---
 title: My E-Mail setup
-tags: email, postfix, wip
+tags: email, postfix, digitalocean
 ---
 
 I run my own email setup on this server (Please don't use this info to hack me). The default options here are Postfix and Dovecot.
