@@ -1,0 +1,45 @@
+---
+title: N900 terminal and mosh setup
+tags: n900, mosh, terminal, bash
+---
+
+# Set up a profile
+
+.locale:
+
+    LANG=de_DE
+    LC_CTYPE="en_US.utf8"
+    LC_NUMERIC="en_US.utf8"
+    LC_TIME="en_US.utf8"
+    LC_COLLATE="en_US.utf8"
+    LC_MONETARY="en_US.utf8"
+    LC_MESSAGES="en_US.utf8"
+    LC_PAPER="en_US.utf8"
+    LC_NAME="en_US.utf8"
+    LC_ADDRESS="en_US.utf8"
+    LC_TELEPHONE="en_US.utf8"
+    LC_MEASUREMENT="en_US.utf8"
+    LC_IDENTIFICATION="en_US.utf8"
+    LC_ALL=en_US.utf8
+
+You can also `curl http://ix.io/bD3 > .locale`
+
+.profile:
+
+    eval `ssh-agent`
+    source ~/.locale
+    bash
+
+You can also `curl http://ix.io/bD4 > .profile`
+
+# Install mosh
+
+First get perl:
+
+    sudo gainroot
+    apt-get update
+    apt-get install perl perl-modules
+
+Then get [mosh debs](http://www.sinanimodelucro.net/lang/en/2013/02/11/mosh-connect-to-your-servers-on-roaming-networks-even-from-n900-maemo-5/) and install them:
+
+    dpkg -i libio-pty-perl_1.07-1maemo2_armel.deb mosh_1.2.2-1_armel.deb

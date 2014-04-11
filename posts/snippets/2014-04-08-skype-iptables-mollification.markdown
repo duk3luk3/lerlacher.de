@@ -20,3 +20,9 @@ In the iptables rule we use the ipt_owner module to make the rule match only pac
 Skype will cope with that and it also doesn't go crazy on those ports.
 
 Lastly, we make the iptables rules permanent by saving them to a file that will get read on boot.
+
+If you want to see that it's working, run
+
+    watch iptables -vL
+
+To see skype packets getting rejects.
