@@ -5,9 +5,9 @@ tags: Phone
 
 It's complicated.
 
-I used this ROM: http://forum.xda-developers.com/showthread.php?t=2549776
-
-And an old version of [twrp](http://forum.xda-developers.com/showthread.php?t=2595654)
+I used
+* a previously rooted HTC Desire with a pretty old version of [twrp](http://forum.xda-developers.com/showthread.php?t=2595654), and
+* a CM11 M12 ROM for HTC Desire: http://forum.xda-developers.com/showthread.php?t=2549776
 
 Steps:
 
