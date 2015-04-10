@@ -17,7 +17,7 @@ License: BSD 3-Clause (like most other Tor projects)
 
 A tool for the [Armed Assault 2](http://www.arma2.com) with [ACE](http://wiki.ace-mod.net/Advanced_Combat_Environment) tactical shooter game. The ACE mod introduces an extremely sophisticated artillery system with a high degree of realism.
 
-ArtyCalc is a tool designed to help leading a simulated artillery battery in the game, mainly by allowing the recording and target calculation of fire missions transmitted to the battery by frontline leadership elements and forward observers.
+ArtyCalc is a tool designed to help leading a simulated artillery battery in the game. It emulates the recording sheets used by real artillery direction forces and also allows to calculate pin-point fire solutions for all ballistic artillery weapons in the game.
 
 Language: C#  
 License: WTFPL
