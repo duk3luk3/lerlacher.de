@@ -37,7 +37,7 @@ I write tutorial articles about server administration for DigitalOcean.
 In the course of running the infrastructure for a university course on systems programming I chose [Gitlab CE](https://github.com/gitlabhq/) to give students git repositories. This required a few modifications to integrate it deeply to make my life easier.
 I think these modifications showcase quite nicely how easy it is to mod Gitlab.
 
-[Key modification system hook](https://github.com/duk3luk3/gitlabhq/tree/system-hook-key): Extends the system hook facility to include ssh key modification events.  
+[Key modification system hook](https://github.com/duk3luk3/gitlabhq/tree/system-hook-key): Extends the system hook facility to include ssh key modification events. This modification has been merged into Gitlab.  
 [Extending user creation API](https://github.com/duk3luk3/gitlabhq/tree/useradd-api-extension): Manually creating a user from the admin interface gives that user a randomly generated password and emails it to them. For some reason this was missing from the API, so I added it, since I needed bulk creation of users and there was no reason to re-implement the password generation and e-mail sending.
 
 ## Saltstack formulas
