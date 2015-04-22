@@ -60,7 +60,7 @@ License: WTFPL
 
 [Supreme Commander Forged Alliance](https://en.wikipedia.org/wiki/Supreme_Commander:_Forged_Alliance) is a Real Time Strategy game from 2007. Spiritual successor to Total Annihilation, it is regarded by many of its fans as the best RTS of all time. The "FA Forever" community lobby is keeping this game alive and contributors are actively working on continuing the development of the core game as well as the ancillary lobby.
 
-Starting in June 2015, I am part of the server and netcode maintenance team.
+Starting in May 2015, I am part of the server and netcode maintenance team.
 
 Language: Python  
 License: GPL
