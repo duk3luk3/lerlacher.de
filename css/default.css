@@ -22,6 +22,10 @@ a:hover {
     text-decoration: underline;
 }
 
+.navpic {
+	vertical-align: sub;
+}
+
 #content a:before {
     content: '»';
     font-size: 0.6em;
