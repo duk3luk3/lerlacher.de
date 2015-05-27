@@ -6,6 +6,9 @@ Lukas Erlacher EDV-Dienstleistungen
 Hofzaunweg 6a  
 83677 Greiling
 
+[English CV](/static/CV-Erlacher-EN.pdf)  
+[German CV](/static/CV-Erlacher-DE.pdf)
+
 I am registered as a freelancer (*Freiberufler*) in Germany.  
 I do not transfer *Umsatzsteuer*.
 
