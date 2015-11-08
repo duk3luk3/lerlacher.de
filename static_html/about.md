@@ -4,7 +4,7 @@ title: About
 
 Hello! My name is Lukas Erlacher. I am a hacker (thus the [glider](http://www.catb.org/hacker-emblem/) in the logo) from Germany.
 
-I just got done with my formal education in Computer Science at the University of Applied Sciences in Munich (TU München) where I finished my Master's degree in April 2015.
+I just got done with chapter two of my formal education in Computer Science at the University of Applied Sciences in Munich (TU München) where I finished my Master's degree in April 2015. Now I am pursuing my PhD while working as a systems engineer for the IT department's IT department.
 
 I have fifteen years of experience trying to make computers do what I want them to do. I've worked as a HTML/PHP/MYSQL/JOOMLA web dev, administered small and medium networks and computing infrastructure, written desktop apps, developed highly-parallel optimization clusters before GPGPU was really a thing (I already had HLSL, so it was bearable), developed the control system and electronics for a battery-electric prototype car, and spent eight years at Technische Universität München.
 
