@@ -31,10 +31,9 @@ main = hakyll $ do
         route   idRoute
         compile copyFileCompiler
 
-    match "posts/**" $ do
+    match "posts/**.md" $ do
         route $ setExtension "html" `composeRoutes` (gsubRoute ".*/" (const "posts/")) 
         compile $ do
-        
             pandocCompiler
                 >>= loadAndApplyTemplate "templates/post.html"    (postCtx tags)
                 >>= loadAndApplyTemplate "templates/default.html" (postCtx tags)

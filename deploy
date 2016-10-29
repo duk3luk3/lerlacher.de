@@ -2,6 +2,6 @@
 
 if [[ "$1" = "live" ]]
 then
-    rsync -r --delete --progress _site/* leda:/var/www/lerlacher.de/
+    rsync -r --delete --progress _site/* root@leda:/var/www/lerlacher.de/
 fi
-rsync -r --delete --progress _site/* leda:/var/www/area51.lerlacher.de/
+rsync -r --delete --progress _site/* root@leda:/var/www/area51.lerlacher.de/
