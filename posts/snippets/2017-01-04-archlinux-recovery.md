@@ -29,7 +29,7 @@ You should now have a working pacman on the target system
 ## 2. Reinstall target system
 
 * Chroot into target: `arch-chroot /mnt`
-* Figure out how to get a working `archlinux-keyring` or set `SigLevel=Never` in `/etc/pacman.conf`
+* [Reset the pacman keyring](https://wiki.archlinux.org/index.php/Pacman/Package_signing#Resetting_all_the_keys) or just set `SigLevel=Never` in `/etc/pacman.conf`
 * Reinstall all packages: `pacman -Qnq | pacman -S --force -`
 
 You can now reboot and your system should boot.

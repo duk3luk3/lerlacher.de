@@ -1,5 +1,7 @@
 #!/bin/bash
 
+./site rebuild
+
 if [[ "$1" = "live" ]]
 then
     rsync -r --delete --progress _site/* luke@leda:/var/www/lerlacher.de/
