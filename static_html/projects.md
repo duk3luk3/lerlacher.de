@@ -54,7 +54,7 @@ Language: C#
 License: WTFPL
 
 [Repository](https://github.com/duk3luk3/ArtyCalc.Sharp)  
-[Website](https://dl.dropboxusercontent.com/u/2808338/arma2/artycalc/artycalc.html)
+[Website](https://duk3luk3.github.io/ArtyCalc.Sharp/)
 
 ## Forged Alliance Forever
 
