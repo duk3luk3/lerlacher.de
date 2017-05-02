@@ -5,9 +5,11 @@ tags: lua, maygodhavemercy
 
 In Lua, everything is a table, and everything that isn't a table is just syntax sugar around a table.
 
-But of course, having only tables - which are hashmaps - is kind of cumbersome - what if you want an array instead of a hashmap?
+Tables are often - when they have only successive integer indices - internally implemented using arrays.
 
-So of course, tables can also be arrays.
+So iterating over them will iterate in key order.
+
+But [don't be fooled](https://www.lua.org/manual/5.3/manual.html#pdf-next) that this will always be true.
 
 Observe:
 
