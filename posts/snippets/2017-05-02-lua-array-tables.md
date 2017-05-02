@@ -43,6 +43,6 @@ As long as you have a table that looks like an array - which lua also has syntax
     > t[3]
     baz
 
-- iterating it (`next` is the "primitive" for iteration in lua) will behave nice and iterate in key order.
+\- iterating it (`next` is the "primitive" for iteration in lua) will behave nice and iterate in key order.
 
 If your table doesn't... well, it'll be hash order. Good luck.
