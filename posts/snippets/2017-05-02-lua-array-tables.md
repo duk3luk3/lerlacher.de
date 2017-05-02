@@ -1,5 +1,5 @@
 ---
-title: Lua doesn't like you, or, a table is not a table
+title: Lua doesn't like you, or, a table is not always a table
 tags: lua, maygodhavemercy
 ---
 
