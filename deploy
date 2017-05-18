@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./site rebuild
+#./site rebuild
 
 if [[ "$1" = "live" ]]
 then

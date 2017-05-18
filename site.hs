@@ -21,22 +21,60 @@ main = hakyll $ do
         route   idRoute
         compile compressCssCompiler
 
-    match "static_html/*" $ do
+    match "static_html/*.en.*" $ do
         route   $ setExtension "html" `composeRoutes` gsubRoute "static_html/" (const "")
         compile $ pandocCompiler
-            >>= loadAndApplyTemplate "templates/default.html" defaultContext
+            >>= loadAndApplyTemplate "templates/default.en.html" defaultContext
+            >>= relativizeUrls
+
+    match "static_html/*.de.*" $ do
+        route   $ setExtension "html" `composeRoutes` gsubRoute "static_html/" (const "")
+        compile $ pandocCompiler
+            >>= loadAndApplyTemplate "templates/default.de.html" defaultContext
+            >>= relativizeUrls
+
+    match "static_html/*.de.*" $ do
+        route   $ setExtension "html" `composeRoutes` gsubRoute "static_html/" (const "")
+        compile $ pandocCompiler
+            >>= loadAndApplyTemplate "templates/default.de.html" defaultContext
+            >>= relativizeUrls
+
+    match (fromRegex "^static_html/[^.]*[.][^.]*$") $ do
+        route   $ setExtension "html" `composeRoutes` gsubRoute "static_html/" (const "")
+        compile $ pandocCompiler
+            >>= loadAndApplyTemplate "templates/default.en.html" defaultContext
             >>= relativizeUrls
 
     match "static/*" $ do
         route   idRoute
         compile copyFileCompiler
 
-    match "posts/**.md" $ do
+    match "posts/**.en.md" $ do
+        route $ setExtension "html" `composeRoutes` (gsubRoute ".*/" (const "posts/"))
+        compile $ do
+            let langCtx =
+                    constField "lang" "en"                `mappend`
+                    constField "alt_lang" "[DE]"          `mappend`
+                    nameField "name"                      `mappend`
+                    postCtx tags
+
+            pandocCompiler
+                >>= loadAndApplyTemplate "templates/post.html"    (langCtx)
+                >>= loadAndApplyTemplate "templates/default.en.html" (langCtx)
+                >>= relativizeUrls
+
+    match "posts/**.de.md" $ do
         route $ setExtension "html" `composeRoutes` (gsubRoute ".*/" (const "posts/")) 
         compile $ do
+            let langCtx =
+                    constField "lang" "de"                `mappend`
+                    constField "alt_lang" "[EN]"          `mappend`
+                    nameField "name"                      `mappend`
+                    postCtx tags
+
             pandocCompiler
-                >>= loadAndApplyTemplate "templates/post.html"    (postCtx tags)
-                >>= loadAndApplyTemplate "templates/default.html" (postCtx tags)
+                >>= loadAndApplyTemplate "templates/post.html"    (langCtx)
+                >>= loadAndApplyTemplate "templates/default.de.html" (langCtx)
                 >>= relativizeUrls
 
 --    match "posts/**" $ do
@@ -50,11 +88,11 @@ main = hakyll $ do
             categories <- buildCategories "posts/**" (fromCapture "posts/*.html")
             let categoryMap = tagsMap categories
             let archiveCtx = mconcat [
+                    tagCloudCtx tags,
                     listField "posts" (postCtx tags) (return posts),
                     constField "title" "Archives",
                     defaultContext
-                    , tagCloudCtx tags ]
-
+                    ]
             makeItem ""
                 >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
                 >>= loadAndApplyTemplate "templates/default.html" archiveCtx
@@ -89,10 +127,10 @@ main = hakyll $ do
                 >>= relativizeUrls
 
 
-    match "index.html" $ do
+    match "index.en.html" $ do
         route idRoute
         compile $ do
-            posts <- recentFirst =<< loadAll "posts/**"
+            posts <- recentFirst =<< loadAll "posts/**.en.md"
             --cats <- buildCategories "posts/**"
 
             let indexCtx =
@@ -102,7 +140,23 @@ main = hakyll $ do
 
             getResourceBody
                 >>= applyAsTemplate indexCtx
-                >>= loadAndApplyTemplate "templates/default.html" indexCtx
+                >>= loadAndApplyTemplate "templates/default.en.html" indexCtx
+                >>= relativizeUrls
+
+    match "index.de.html" $ do
+        route idRoute
+        compile $ do
+            posts <- recentFirst =<< loadAll "posts/**.de.md"
+            --cats <- buildCategories "posts/**"
+
+            let indexCtx =
+                    listField "posts" (postCtx tags) (return posts) `mappend`
+                    constField "title" "Home"                `mappend`
+                    defaultContext
+
+            getResourceBody
+                >>= applyAsTemplate indexCtx
+                >>= loadAndApplyTemplate "templates/default.de.html" indexCtx
                 >>= relativizeUrls
 
     match "templates/*" $ compile templateCompiler
@@ -130,6 +184,22 @@ postList pattern postCtx sortFilter = do
     posts <- sortFilter =<< loadAll pattern
     itemTpl <- loadBody "templates/post-item.html"
     applyTemplateList itemTpl postCtx posts
+
+nameField :: String -> Context a
+nameField key = field key $ return . lastSlash . firstSplit . toFilePath . itemIdentifier
+
+dotSplit :: String -> [String]
+dotSplit = splitAll "[.]..[.]"
+
+slashSplit :: String -> [String]
+slashSplit = splitAll "/"
+
+firstSplit :: String -> String
+firstSplit = head . dotSplit
+
+lastSlash :: String -> String
+lastSlash = last . slashSplit
+
 
 --catOnly :: MonadMetadata m => Tags -> [Item a] -> m [Item a]
 --catOnly cats = 
