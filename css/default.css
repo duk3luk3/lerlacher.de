@@ -24,6 +24,16 @@ a:hover {
 
 .navpic {
 	vertical-align: sub;
+	height: 24px;
+}
+
+.langpic {
+	height: 28px;
+}
+
+.altlangpic {
+	vertical-align: top;
+	height: 24px;
 }
 
 #content a:before {

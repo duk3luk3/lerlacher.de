@@ -1,0 +1,87 @@
+---
+title: 'Salt Formulas: Get up to speed with salt'
+tags: saltstack
+---
+
+Follow along with this walkthrough to set up a Graphite realtime graphing server using saltstack.
+
+This tutorial was made on four debian 8 VMs, called "saltmaster", "graphitemaster", and "graphiteslave[1,2]". They have obvious functions.
+
+# Install salt
+
+Install Packages:
+
+    luke@saltmaster:~$ sudo apt-get install salt-master
+
+    luke@graphitemaster:~$ sudo apt-get install salt-minion
+
+    luke@graphiteslave1:~$ sudo apt-get install salt-minion
+
+    luke@graphiteslave2:~$ sudo apt-get install salt-minion
+
+Now we need to make the minions see the master. By default minions connect to the "salt" host so we just put the master's IP in all of the minions' `/etc/hosts` file. Then restart the minion so it will resolve the master again.
+
+    luke@graphitemaster:~$ sudo vim /etc/hosts
+    luke@graphitemaster:~$ sudo service salt-minion restart
+
+Do this on all three minions.
+
+You can then see the minion keys on the master using `salt-key`:
+
+    luke@saltmaster:~$ sudo salt-key -L
+    Accepted Keys:
+    Unaccepted Keys:
+    graphitemaster.saltnet
+    graphiteslave1.saltnet
+    graphiteslave2.saltnet
+    Rejected Keys:
+
+Accept the keys using `-A`:
+
+    luke@saltmaster:~$ sudo salt-key -A
+    The following keys are going to be accepted:
+    Unaccepted Keys:
+    graphitemaster.saltnet
+    graphiteslave1.saltnet
+    graphiteslave2.saltnet
+    Proceed? [n/Y]
+    Key for minion graphitemaster.saltnet accepted.
+    Key for minion graphiteslave1.saltnet accepted.
+    Key for minion graphiteslave2.saltnet accepted.
+
+Now you have a working salt:
+
+    luke@saltmaster:~$ sudo salt '*' test.ping
+    graphitemaster.saltnet:
+        True
+    graphiteslave2.saltnet:
+        True
+    graphiteslave1.saltnet:
+        True
+
+# Set up formula
+
+This mostly follows the [formula docs](https://docs.saltstack.com/en/latest/topics/development/conventions/formulas.html).
+
+The graphite formula depends on the pip formula so we "install" both.
+
+sudo mkdir /srv/formulas
+cd /srv/formulas/
+sudo git clone https://github.com/saltstack-formulas/graphite-formula
+sudo git clone https://github.com/saltstack-formulas/pip-formula
+sudo nano /etc/salt/master
+
+Make the `file_roots` look like this:
+
+    file_roots:
+      base:
+        - /srv/salt
+        - /srv/formulas/graphite-formula
+        - /srv/formulas/pip-formula
+
+And restart salt master.
+
+    sudo service salt-master restart
+
+
+

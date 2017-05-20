@@ -3,8 +3,6 @@ title: How to make an ubuntu repo mirror that actually works
 tags: ubuntu, linux, bash
 ---
 
-EN VERSION
-
 ## Introduction
 
 All ubuntu mirrors I've seen (such as `de.archive.ubuntu.com`) become inconsistent when they're being updated. I don't know why they'd do this in the first place, but it appears the the indexes are updated first, and then the packages are uploaded afterwards.

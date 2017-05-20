@@ -1,0 +1,25 @@
+---
+title: Wine buggery
+tags: wine, archlinux, windows
+---
+
+# Wine buggery
+
+Objective: Run the FAForever Community Lobby Client source code in linux.
+
+1. Install `wine`
+2. Install Python 2.7 into Wine (from [python.org](///python.org))
+2. Run `wine 'C:\python27\python' -m pip install -r requirements.txt`, but it fails because it needs git
+3. Try, and fail, to install Git for Windows into Wine (https://bugs.winehq.org/show_bug.cgi?id=40013) -> comment out git dependency, worry about that later
+4. `lupa` dependency also fails because it needs Lua
+5. Go to http://files.luaforge.net/releases/luaforwindows/luaforwindows, installer tries to download `http://luaforwindows.googlecode.com/files/vcredist_x86.exe`, `404`
+6. `winetricks wininet` does nothing
+7. google `vcredist_x86` and download
+8. `echo 127.0.0.1 luaforwindows.googlecode.com | sudo tee -a /etc/hosts`
+9. `mkdir files; cp ~/Downloads/vcredist_x86.exe files/; sudo python -m http.server 80`
+10. Yep, I just did that, and yep, it works
+11. It's useless though because it actually wants `lua.h` as include to build something
+12. `find /usr/include -name 'lua.h'`
+13. `cp /usr/include/lua.h .`
+14. haha, of course that does nothing
+15. Find out there's actually a recent version of lua for windows at https://github.com/rjpcomputing/luaforwindows/releases

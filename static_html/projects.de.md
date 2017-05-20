@@ -2,7 +2,7 @@
 title: Portfolio
 ---
 
-Mein Portfolio umfasst so ziemlich alles vom Aufbau der Infrastruktur für ein Informatik-Praktikum bis zum Maintainen einer Supreme-Commander-Total-Conversion für eine Gaming-Community mit 50000 Mitgliedern.
+Mein Portfolio umfasst so einiges - vom Aufbau der Infrastruktur für ein Informatik-Praktikum über Steuersysteme für Prototypen-Rennautos bis zu einer Echtzeitstrategie-Total-Conversion für eine Gaming-Community mit 50000 Mitgliedern.
 
 <div class="tabs">
 

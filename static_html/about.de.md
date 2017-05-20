@@ -8,6 +8,7 @@ Vor einiger Zeit (April 2015) habe ich mein Informatik-Studium an der TU Münche
 
 Ich habe jetzt 20 Jahre Erfahrung damit, Computer dazu zu bringen dass sie das tun was ich will. Ich habe als HTML/PHP/MYSQL/JOOMLA Web-Developer gearbeitet, kleine bis große Netzwerke und EDV-Systeme administriert, Desktop-Anwendungen entwickelt, hochparallelisterte Optimieriungscluster gebaut bevor es GPGPU wirklich gab (HLSL ftw), die Fahrsteuerung und die Elektronik für ein elektrisches Prototypen-Fahrzeug entwickelt, und zehn Jahre meines Lebens an der TU München verbracht.
 
-Netzwerkcode und Embedded Development sind meine stärksten Felder. Backend ist mir lieber als Frontend, und Korrektheit von Programmen sollte bewiesen sein statt durch Tests suggeriert. C, Python und C# beherrsche ich auf Profi-Level. Java, Lua, PHP und JS kann ich auch.
+Netzwerkcode und Embedded Development sind meine stärksten Felder. Backend ist mir lieber als Frontend, und Korrektheit von Programmen sollte bewiesen sein statt durch Tests suggeriert. C, Python und C# beherrsche ich auf Profi-Level. Java, Lua, PHP und JS kann ich auch.  
+Als Betriebssystem verwende ich GNU/Linux.
 
 Wie man am Seiten-Layout sieht, bin ich kein Designer. Ich benutze auch das "Windows Classic" Desktop-Theme und bevorzuge die Konsole gegenüber GUI-Programmen.
