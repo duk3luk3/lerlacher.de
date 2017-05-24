@@ -11,23 +11,23 @@ I have been working as a Computer Scientist for ten years. You can read about a 
 As a free computer scientist I am happy to support you or your team members in any project, for example if you need professional external support with one of the following problems:
 
 * **Dev-Ops** / Infrastructure services
-    * Upgrade of Legacy Infrastructure
-    * Introduction of central configuration management
-    * Development and/or maintenance of infrastructure services
-    * Evaluation and improvement of IT infrastructure security
-    * In-Housing of infrastructure services (e.g. E-Mail)
+    * Upgrade of Legacy Infrastructure [Why?](why.en.html#upgrade_legacy)
+    * Introduction of central configuration management [Why?](why.en.html#config_management)
+    * Development and/or maintenance of infrastructure services [Why?](why.en.html#infra_services)
+    * Evaluation and improvement of IT infrastructure security [Why?](why.en.html#security)
+    * In-Housing of infrastructure services (e.g. E-Mail) [Why?](why.en.html#inhousing)
 * **Open-Source / Free Software** Development
-    * Maintenance of Open-Source components in your IT tech stack
-    * Development Contribution to Open-Source software
-    * Maintenance of Open-Source software
+    * Maintenance of Open-Source components in your IT tech stack [Why?](why.en.html#oss_maint)
+    * Development Contribution to Open-Source software [Why?](why.en.html#oss_contrib)
+    * Management of Open-Source software projects [Why?](why.en.html#oss_manage)
 * **Web Services** / Web Applications / Cloud Services
-    * Maintenance of Services in In-House Cloud / Hybrid Cloud / SaaS
-    * Configuration Management for Web Services
-    * Management of In-House Cloud / Clustering
+    * Maintenance of Services in In-House Cloud / Hybrid Cloud / SaaS [Why?](why.en.html#cloud_maint)
+    * Configuration Management for Web Services [Why?](why.en.html#web_config)
+    * Management of In-House Cloud / Clustering [Why?](why.en.html#cloud_manage)
 * **Process and Workflow** Management
-    * Helpdesk procedures
-    * Testing, staging, deployment workflows
-    * Infrastructure management and configuration procedures
+    * Helpdesk procedures [Why?](why.en.html#helpdesk)
+    * Testing, staging, deployment workflows [Why?](why.en.html#dev_workflow)
+    * Infrastructure management and configuration procedures [Why?](why.en.html#infra_workflow)
 
 I can help you if...
 
