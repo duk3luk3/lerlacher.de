@@ -1,73 +1,73 @@
 ---
-title: Standing up your own Have-I-Been-Pwned Passwords Server
+title: Bau deinen eigenen Have-I-Been-Pwned Passwortchecker
 tags: hibp, linux, python, db, postgres
 ---
 
 <span style="background-color: #FF9999; padding-left: 5em; padding-right: 5em;">
-**Please read the caveats below this introduction before trying to play along at home**.
+**Bitte lest die Hinweise unter diesem Einführungstext bevor ihr versucht das nachzubauen**.
 </span>
 
-[Have I Been Pwned](https://haveibeenpwned.com/) (HIBP) is a great service by [Troy Hunt](https://troyhunt.com/) that allows you to check if logins (and passwords) associated with your email address have been in publicised website breaches.
+[Have I Been Pwned](https://haveibeenpwned.com/) (HIBP) ist eine großartige Webseit von [Troy Hunt](https://troyhunt.com/) auf der man prüfen kann, ob die eigene E-Mail-Adresse in "geleakten" Benutzerdatenbanken enthalten ist und das dazugehörende Passwort darum vielleicht nicht mehr sicher ist.
 
-In August, Troy Hunt added an entirely new feature to HIBP: Checking passwords against a database of [306 million breached passwords](https://www.troyhunt.com/introducing-306-million-freely-downloadable-pwned-passwords/) that he compiled.
+Im August hat Troy Hunt dann ein ganz neues Feature dazugebaut: Die Möglichkeit, direkt Passwörter gegen seine Datenbank mit [306 Millionen geknackten Passwörtern](https://www.troyhunt.com/introducing-306-million-freely-downloadable-pwned-passwords/) zu prüfen.
 
-This database can also be [queried on HIBP directly](https://haveibeenpwned.com/Passwords) and in the [HIBP API](https://haveibeenpwned.com/API/v2#PwnedPasswords).
+Die Datenbank kann [direkt auf HIBP abgefragt werden](https://haveibeenpwned.com/Passwords) und ist auch über die [HIBP API](https://haveibeenpwned.com/API/v2#PwnedPasswords) verfügbar.
 
-As Troy Hunt explains in his own blog posts, it is now a NIST recommendation to check user passwords against known compromised passwords.
+Wie Troy Hunt auch in seinem eigenen Blogpost erklärt, empfiehlt das NIST inzwischen ausdrücklich Benutzerpasswörter gegen bekannte Listen geknackter Passwörter zu prüfen.
 
-So, if you have users and maintain a database of logins for them, this is something that could be very useful for you. I am one of those people who have users with logins of passwords.
+Wenn ihr also Benutzer mit Logins habt, könnte so eine Datenbank für euch sehr nützlich sein. Auch auf mich trifft das zu.
 
-However, it is obviously a bad idea to send (potential) user passwords to someone else on the internet, even someone as trustworthy as Troy Hunt!
+Aber natürlich ist es eine schlechte Idee, (potenzielle) Benutzerpasswörter an eine Seite im Internet zu schicken, sogar wenn es Troy Hunt ist!
 
-So I set to replicate the PwnedPasswords API so I could host it inside my (client's) own infrastructure.
+Ich habe mich also an die Arbeit gemacht und die Pwned Passwords-API nachgebaut damit ich sie in meinem eigenen (Kunden-) Netz betreiben kann.
 
-Here's how to do that!
+Und hier erkläre ich wies geht!
 
-What you will need:
+Zutaten:
 
-* A server (I am using an ESXi VMWare hosted virtual machine with 4GB of RAM and 80GB of disk running Ubuntu 16.04)
-* A database (PostgreSQL 9.6)
-* A webapp for the API (I wrote a Python Flask-based app)
-* An integration for your signup / password change frontend that queries the webapp
+* Ein Server (Ich benutze eine VM in ESXi VMWare mit 4GB RAM und 80GB Festspeicher auf der Ubuntu 16.04 als Betriebssystem läuft)
+* Eine Datenbank (PostgreSQL 9.6)
+* Eine Web-Application für die API
+* Die Integration für eure Registrierungs / Passwort-Seite, mit der die API abgefragt wird
 
-This post is accompanied by this webapp: https://github.com/duk3luk3/pwndwords
+Die dazugehörende Web-App findet man hier: https://github.com/duk3luk3/pwndwords
 
 <span style="background-color: #FF9999; padding-left: 5em; padding-right: 5em;">
-**Caveats**
+**Achtung**
 </span>
 
-* You will be setting up a database with approx. 16GB of data and 11GB of index. That is not big data but it's not trivial data anymore either. If you make a mistake you can easily kick off a database operation that will sit there spinning for ten minutes.
-* This post is written with a private on-premises deployment in mind. If you want to make this publicly available you will need to take additional measures, e.g. rate-limiting, that have not been taken account here.
-* You should recommend / urge you users to use password managers and randomly generated passwords / diceware passphrases. This API does not do anything to estimate password quality which has [its own bag of caveats](https://nakedsecurity.sophos.com/2015/03/02/why-you-cant-trust-password-strength-meters/).
+* Die Größe der Passwortliste führt dazu dass die Datenbank ca. 16GB Daten und 11GB Index enthalten wird. Das ist nicht "Big Data" aber auch nicht mehr ganz simpel. Wenn ihr hier einen Fehler macht führt das leicht zu Datenbankoperationen die sehr lange dauern!
+* Dieser Artikel ist für ein privates Deployment in einem Intranet geschrieben. Wenn ihr ein öffentliches Interface anbieten wollt, müsst ihr über Maßnahmen wie Rate-Limiting und Caching nachdenken, die ich hier nicht beachtet habe.
+* Ihr solltet euren Benutzern nahelegen, Passwortmanager und zufällig generierte Passwörter und Passphrasen (Diceware!) zu benutzen. Diese API dient nicht zum bewerten von Passwort-Komplexität, was sowieso [nicht ganz trivial ist](https://nakedsecurity.sophos.com/2015/03/02/why-you-cant-trust-password-strength-meters/).
 
-And now let's go ~~
+Und los gehts ~~
 
-## The database
+## Datenbank
 
-I am not an expert on databases in any way shape or form, but here is what I came up with:
+Ich bin kein Datenbankexperte, aber das ist mir eingefallen:
 
-* Postgres 9.6 on Ubuntu 16.04
-* Main 'passwords' table with id and passwords
-* Additional table for auxiliary data (e.g. hit counter)
+* Postgres 9.6 auf Ubuntu 16.04
+* 'passwords' Tabelle mit primary key, passworthash, und Index
+* Ggf. zusätzliche Tabelle für andere Daten (z.B. Hit Counter)
 
-Install pg9.6 on Ubuntu 16.04:
+Zuerst muss pg9.6 installiert werden:
 
-* Follow apt source list setup instructions here: https://www.postgresql.org/download/linux/ubuntu/
+* Apt source list Setup Anleitung hier befolgen: https://www.postgresql.org/download/linux/ubuntu/
 * `sudo aptitude install postgresql-9.6`
 
-You may want to edit the postgres configuration to tune its memory allocations (especially the `shared_buffers` and `work_mem` settings). See here for [tuning PostgreSQL](https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server).
+Es ist sinnvoll die Postgres-Konfiguration anzupassen um die Arbeitsspeicher-Allokation zu tunen (besonders `shared_buffers` und `work_mem`). Im PostgreSQL-Wiki gibt es eine [Tuning PostgreSQL](https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server)-Anleitung.
 
-Setup a user:
+Einen Datenbank-User erstellen:
 
 * `sudo -u postgres -i`
 * `createuser -s -r -d erlacher`
 * `logout`
 
-Setup a database:
+Datenbank erstellen:
 
 * `createdb passwords`
 
-Create extension (`pgcrypto` extension for `digest` function), table and index:
+Extension (`pgcrypto` Extension für `digest` Funktion), Tabelle und Index erstellen:
 
 ```sql
 CREATE EXTENSION pgcrypto;
@@ -75,15 +75,16 @@ CREATE TABLE passwords ( id bigserial PRIMARY KEY, hash bytea);
 CREATE INDEX ON passwords (substring(hash for 7));
 ```
 
-This is an index on the first 7 bytes of the sha1 hash. For our list of 300 million passwords, that is a very useful index size.
+Damit wird ein Index über die ersten 7 bytes des SHA1-Passwort-Hashes gebaut. Für unsere Liste mit 300 Millionen Passwörtern ist das eine gute Index-Größe, da es damit kaum Kollisionen geben sollte.
 
-## Get and clean data
+## Daten laden und säubern
 
-(If you are reading this in the future, V2 of the password list may have been released and be clean so you might not need to do this step.)
+(In Zukunft sollte V2 der Passwort-Liste verfügbar sein, dann kann man sich diesen Schritt vielleicht sparen.)
 
-* Download the files from https://haveibeenpwned.com/Passwords
-* Unzip them with `p7zip -d`
-* Clean duplicates from the files:
+
+* Dateien von https://haveibeenpwned.com/Passwords herunterladen
+* Mit `p7zip -d` entpacken
+* Duplikate entfernen:
 
 ```
 $ time sort --parallel=4 -u pwned-passwords-1.0.txt pwned-passwords-update-1.txt pwned-passwords-update-2.txt > pwned_all_uniq.txt
@@ -93,34 +94,34 @@ user	1m42.476s
 sys	0m26.056s
 ```
 
-(Without `--parallel` it took 12 minutes to sort just the first file - but the 4 minutes here may be cache effects.)
+(Ohne `--parallel` dauerte es 12 Minuten für nur die erste Datei - aber beim Aufruf mit `--parallel` war eventuell schon der Disk-Cache gefüllt)
 
-## Load into database
+## In die Datenbank importieren
 
-If you've been playing around with the db and want to clean it up before loading the full list, do this:
+Wenn ihr schon mit der Datenbank rumgespielt habt und sie säubern wollt bevor ihr die volle Liste importiert, könnte ihr die Tabelle truncaten:
 
 ```sql
 TRUNCATE passwords RESTART IDENTITY;
 ```
 
-Then load it:
+Dann den Import starten:
 
 ```
 $ sed -e 's/^/\\\\x/' pwned_all_uniq.txt | time psql passwords -c "copy passwords (hash) from STDIN"
 ```
 
-The `sed` here is necessary to prepend the escape sequence `\\x` to all hashes so that pg will recognize them as hexadecimal strings.
+Das `sed` ist hier notwending um `\\x` vor alle Hashes einzufügen damit Postgres sie als Hexadezimal-Strings erkennt.
 
 ## Query
 
-To utilize the index, we need to invoke it by using a where condition that matches the index expression:
+Um den Index zu benutzen, muss eine WHERE-Condition die zum Index passt in der Query benutzt werden:
 
 ```sql
 prepare pw_lookup (bytea) as select * from passwords WHERE substring(hash for 7) = substring($1 for 7) and hash = $1;
 explain analyze execute pw_lookup(digest('sommernacht','sha1'));
 ```
 
-and we get this:
+Und ihr solltet eine Ausgabe wie hier erhalten:
 
 ```
                                                                 QUERY PLAN
@@ -137,16 +138,17 @@ and we get this:
 
 ## Webserver
 
-The server will be a Flask app hosted with apache2 and `mod_wsgi`.
+Ich habe eine Flask-App geschrieben die in Apache2 mit `mod_wsgi` läuft.
 
-Install apache2, `mod_wsgi` (for Python3!) and python3 stuff:
+
+Apache2, `mod_wsgi` (für Python3!) and Python3 Infrastruktur installieren:
 
 ```
 sudo apt-get install apache2 libapache2-mod-wsgi-py3 python3-pip python3-venv
 sudo a2enmod ssl wsgi
 ```
 
-Create the app, or just clone mine:
+Jetzt müsst ihr eine App bauen - oder einfach meine benutzen:
 
 ```
 sudo mkdir /opt/password-lookup
@@ -154,7 +156,7 @@ sudo chown erlacher:tumuser /opt/password-lookup/
 git clone git@github.com:duk3luk3/pwndwords.git /opt/password-lookup
 ```
 
-You can install the requirements into your system globally, or use a venv. I like to use venvs:
+Die Requirements für die App kann man global installieren, oder ihr könnt ein Virtualenv benutzen. Ich mag Virtualenvs:
 
 ```
 cd /opt/password-lookup
@@ -164,9 +166,9 @@ cp activate_this.py .venv/bin/
 pip install -r requirements.txt
 ```
 
-The very special python3 distribution in Ubuntu lacks `activate_this.py` so you need to copy that from the repository.
+Da die Python3-Distribution in Ubuntu ein bisschen speziell ist, muss man `activate_this.py` kopieren.
 
-Now grab `/etc/apache2/sites-available/default-ssl.conf` and set it up to create a [wsgi service](http://flask.pocoo.org/docs/0.12/deploying/mod_wsgi/):
+Jetzt könnt ihr in `/etc/apache2/sites-available/default-ssl.conf` einen [Wsgi-Service](http://flask.pocoo.org/docs/0.12/deploying/mod_wsgi/) einbauen:
 
 ```
 <IfModule mod_ssl.c>
@@ -192,15 +194,15 @@ Now grab `/etc/apache2/sites-available/default-ssl.conf` and set it up to create
 
 ```
 
-Fill in appropriate values for all the CAPITALISED placeholder values in there.
+Die in GROSSBUCHSTABEN eingetragenen Platzhalter müsst ihr entsprechend einsetzen.
 
 ## Integration
 
-OK, this bit is *really* gnarly and consists mainly of things copy-pasted off of StackOverflow, so please don't copy and paste this in turn, take it only as an instructive proof-of-concept.
+So, dieser letzte Teil ist keine Meisterleistung der Software-Kunst und besteht größtenteils aus Copy-Paste von StackOverflow, und sollte deshalb nur als Proof-of-Concept gesehen werden.
 
-You should also consider that ideally you should **not** have the API exposed publicly **unless** you take additional measures for rate-limiting.
+Die API selbst solltet ihr auch **nicht** öffentlich zugänglich machen außer ihr baut zuerst Rate-limiting und Caching ein.
 
-This code **also** should hash the passwords with SHA-1 before submitting them to the API for just a little bit more feel-good factor.
+Um sich noch ein bisschen sicherer zu fühlen, sollte man auch die Passwörter hashen bevor sie an die API geschickt werden...
 
 jQuery AJAX code:
 
@@ -263,7 +265,7 @@ jqxhr = $.ajax({
 </script>
 ```
 
-HTML form part with the inputs:
+HTML Form mit den Inputs:
 
 ```
                 <table>
