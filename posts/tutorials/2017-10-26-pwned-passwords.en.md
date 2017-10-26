@@ -3,6 +3,10 @@ title: Standing up your own Have-I-Been-Pwned Passwords Server
 tags: hibp, linux, python, db, postgres
 ---
 
+<span style="background-color: #FF9999; padding-left: 5em; padding-right: 5em;">
+**Please read the caveats below this introduction before trying to play along at home**.
+</span>
+
 [Have I Been Pwned](https://haveibeenpwned.com/) (HIBP) is a great service by [Troy Hunt](https://troyhunt.com/) that allows you to check if logins (and passwords) associated with your email address have been in publicised website breaches.
 
 In August, Troy Hunt added an entirely new feature to HIBP: Checking passwords against a database of [306 million breached passwords](https://www.troyhunt.com/introducing-306-million-freely-downloadable-pwned-passwords/) that he compiled.
@@ -28,6 +32,16 @@ What you will need:
 
 This post is accompanied by this webapp: https://github.com/duk3luk3/pwndwords
 
+<span style="background-color: #FF9999; padding-left: 5em; padding-right: 5em;">
+**Caveats**
+</span>
+
+* You will be setting up a database with approx. 16GB of data and 11GB of index. That is not big data but it's not trivial data anymore either. If you make a mistake you can easily kick off a database operation that will sit there spinning for ten minutes.
+* This post is written with a private on-premises deployment in mind. If you want to make this publicly available you will need to take additional measures, e.g. rate-limiting, that have not been taken account here.
+* You should recommend / urge you users to use password managers and randomly generated passwords / diceware passphrases. This API does not do anything to estimate password quality which has [its own bag of caveats](https://nakedsecurity.sophos.com/2015/03/02/why-you-cant-trust-password-strength-meters/).
+
+And now let's go ~~
+
 ## The database
 
 I am not an expert on databases in any way shape or form, but here is what I came up with:
@@ -40,6 +54,8 @@ Install pg9.6 on Ubuntu 16.04:
 
 * Follow apt source list setup instructions here: https://www.postgresql.org/download/linux/ubuntu/
 * `sudo aptitude install postgresql-9.6`
+
+You may want to edit the postgres configuration to tune its memory allocations (especially the `shared_buffers` and `work_mem` settings). See here for [tuning PostgreSQL](https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server).
 
 Setup a user:
 
@@ -101,13 +117,13 @@ To utilize the index, we need to invoke it by using a where condition that match
 
 ```sql
 prepare pw_lookup (bytea) as select * from passwords WHERE substring(hash for 7) = substring($1 for 7) and hash = $1;
-explain analyze execute pw_lookup(digest('sommernacht','sha1'));                                                                                                                                                                         
+explain analyze execute pw_lookup(digest('sommernacht','sha1'));
 ```
 
 and we get this:
 
 ```
-                                                                QUERY PLAN                                                                
+                                                                QUERY PLAN
 ------------------------------------------------------------------------------------------------------------------------------------------
  Bitmap Heap Scan on passwords  (cost=29579.61..2284020.12 rows=1 width=29) (actual time=16.376..16.376 rows=1 loops=1)
    Recheck Cond: ("substring"(hash, 1, 7) = '\x431ce891a0129c'::bytea)
@@ -180,7 +196,7 @@ Fill in appropriate values for all the CAPITALISED placeholder values in there.
 
 ## Integration
 
-OK, this bit is *really* gnarly, so please don't copy and paste this, take it only as an instructive example.
+OK, this bit is *really* gnarly and consists mainly of things copy-pasted off of StackOverflow, so please don't copy and paste this in turn, take it only as an instructive proof-of-concept.
 
 You should also consider that ideally you should **not** have the API exposed publicly **unless** you take additional measures for rate-limiting.
 
@@ -258,14 +274,12 @@ HTML form part with the inputs:
                         <tr>
                                 <td>New Password:</td>
                                 <td><input id='pwedit' type=password name=password_new size=60 /></td>
-{% if do_check_pw %}
                                 <td>
                                         <span id="pwhint_working" style="display: none;"><img src="/24px-spinner-black.gif"> Checking password, please wait.</span>
                                         <span id="pwhint_pwnd" style="background-color: #ff9999; display: none;">This password has been pwned and is not allowed.</span>
                                         <span id="pwhint_ok" style="display: none;">This password has not previously been pwned. (But that does not mean it is a good password)</span>
                                         <span id="pwhint_error" style="display: none;">There was an error checking your password :-(</span>
                                 </td>
-{% endif %}
                         </tr>
                         <tr>
                                 <td>Repeat New Password:</td>
