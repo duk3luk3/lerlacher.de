@@ -6,8 +6,6 @@ Mein Pitch, im Detail.
 
 # Dev-Ops und Infrastrukturdienste
 
-As a professional systems engineer, I live and breathe Dev-Ops and infrastructure services.
-
 Als professionaller Systemingenieur liegen mir Dev-Ops und Infrastrukturdienste im Blut und am Herzen.
 
 Infrastrukturdienste sind oft aus selbst gemachten Servern und kommerziellen Appliances zusammengebastelt, die von einem oder einer Handvoll Administratoren gewartet werden. Ohne einen ganzheitlichen Blick über die Systemarchitektur, mit dem Ziel eine konsistente Benutzeroberfläche und konsistente Backend-Architektur zu schaffen, sind Reibungsverluste vorprogrammiert - und es dauert Wochen, wenn nicht Monate, um Probleme zu lösen.
