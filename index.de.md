@@ -43,4 +43,4 @@ Bitte kontaktieren Sie mich per E-Mail - siehe [Kontakt](contact.de.html).
 ## Posts
 $partial("templates/post-list.html")$
 
-[Archiv](/archive.html)
+[Archiv](/archive.de.html)

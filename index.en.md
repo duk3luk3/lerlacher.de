@@ -44,4 +44,4 @@ You can find my contact information at [Contact](contact.en.html).
 <h2>Posts</h2>
 $partial("templates/post-list.html")$
 
-<p><a href="/archive.html">Archives</a></p>
+<p><a href="/archive.en.html">Archives</a></p>
