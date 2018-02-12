@@ -1,6 +1,6 @@
 ---
 title: SSH Reverse Tunnel
-tags: ssh
+tags: ssh, systemd
 ---
 
 This is a neat trick to keep a device sitting behind NAT reachable as long as it can make outbound SSH connections.
